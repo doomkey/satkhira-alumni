@@ -1,17 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Label } from "@radix-ui/react-select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { ChevronDown } from "lucide-react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "./ui/card";
-import { Input } from "./ui/input";
 
 export default function Hero() {
   const scrollToBottom = () => {
