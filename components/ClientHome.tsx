@@ -132,8 +132,6 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
         />
       </div>
 
-      <hr className="my-4" />
-
       {processedAlumni.length === 0 ? (
         <p>No alumni found matching the current filters.</p>
       ) : (

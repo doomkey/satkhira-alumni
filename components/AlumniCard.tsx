@@ -77,7 +77,7 @@ export default function AlumniCard({
     [alumni.village, alumni.upazilla].filter(Boolean).join(", ") || null;
 
   return (
-    <Card className="relative overflow-hidden border border-slate-200 dark:border-slate-700 bg-card  hover:shadow-md transition-all duration-200 rounded-xl">
+    <Card className="relative overflow-hidden ">
       <div className="flex flex-col gap-5 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-20 w-20 border border-blue-200 shrink-0 mx-auto sm:mx-0 overflow-hidden">
@@ -102,7 +102,7 @@ export default function AlumniCard({
         </div>
 
         <Tabs defaultValue="contact" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-slate-800">
+          <TabsList className="w-full">
             <TabsTrigger value="contact">Contact</TabsTrigger>
             {alumni.profession == "Job Holder" && (
               <TabsTrigger value="work">Work</TabsTrigger>
