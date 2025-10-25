@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Pencil,
   Trash2,
@@ -10,6 +11,10 @@ import {
   MapPin,
   Briefcase,
   Building2,
+  Phone,
+  Globe,
+  BookUser,
+  Calendar,
 } from "lucide-react";
 
 interface AlumniCardProps {
@@ -17,6 +22,47 @@ interface AlumniCardProps {
   onEdit?: (alumni: AlumniRecord) => void;
   onDelete?: (alumniId: string) => void;
 }
+
+const InfoRow = ({
+  icon: Icon,
+  label,
+  value,
+  href,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value?: string | null;
+  href?: string;
+}) => {
+  if (!value) return null;
+
+  const content = (
+    <div className="flex items-start gap-3">
+      <Icon className="h-4 w-4 text-zinc-500 shrink-0 mt-1" />
+      <div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+        <p className="text-base font-medium text-slate-800 dark:text-slate-100 break-all">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-md p-2 -ml-2 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <div className="p-2 -ml-2">{content}</div>;
+};
 
 export default function AlumniCard({
   alumni,
@@ -27,18 +73,20 @@ export default function AlumniCard({
     ? alumni.name.charAt(0).toUpperCase()
     : "A";
 
-  return (
-    <Card className="relative overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:shadow-md transition-all duration-200 rounded-xl">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-zinc-500 to-slate-500" />
+  const address =
+    [alumni.village, alumni.upazilla].filter(Boolean).join(", ") || null;
 
+  return (
+    <Card className="relative overflow-hidden border border-slate-200 dark:border-slate-700 bg-card  hover:shadow-md transition-all duration-200 rounded-xl">
       <div className="flex flex-col gap-5 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <Avatar className="h-20 w-20 border border-blue-200 shrink-0 mx-auto sm:mx-0">
+          <Avatar className="h-20 w-20 border border-blue-200 shrink-0 mx-auto sm:mx-0 overflow-hidden">
             <AvatarImage
               src={alumni.image || "/placeholder-avatar.jpg"}
               alt={alumni.name}
+              className="object-cover object-center h-full w-full"
             />
-            <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
+            <AvatarFallback className="bg-primary text-white text-lg font-semibold">
               {fallbackInitial}
             </AvatarFallback>
           </Avatar>
@@ -47,55 +95,65 @@ export default function AlumniCard({
             <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 leading-snug">
               {alumni.name}
             </h3>
-            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-1">
-              {alumni.faculty && (
-                <Badge variant="secondary" className="text-[11px] font-medium">
-                  {alumni.faculty}
-                </Badge>
-              )}
-              {alumni.session && (
-                <Badge variant="outline" className="text-[11px] font-medium">
-                  {alumni.session}
-                </Badge>
-              )}
-            </div>
+            <p className="text-base text-primary font-medium">
+              {alumni.profession || "Profession N/A"}
+            </p>
           </div>
         </div>
 
-        <CardContent className="p-0 space-y-3">
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-blue-500 shrink-0" />
-            <span className="text-base font-medium text-slate-800 dark:text-slate-100">
-              {alumni.email || "N/A"}
-            </span>
-          </div>
+        <Tabs defaultValue="contact" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-slate-800">
+            <TabsTrigger value="contact">Contact</TabsTrigger>
+            {alumni.profession == "Job Holder" && (
+              <TabsTrigger value="work">Work</TabsTrigger>
+            )}
+            <TabsTrigger value="academic">Academic</TabsTrigger>
+          </TabsList>
 
-          <div className="space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-blue-500 shrink-0" />
-              <span>
-                {[alumni.village, alumni.upazilla].filter(Boolean).join(", ") ||
-                  "Location N/A"}
-              </span>
-            </div>
+          <TabsContent value="work" className="mt-4 pr-1 space-y-3">
+            <InfoRow icon={Building2} label="Company" value={alumni.company} />
+            <InfoRow icon={Pencil} label="Job Rank" value={alumni.job_rank} />
+          </TabsContent>
 
-            <div className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-blue-500 shrink-0" />
-              <span>
-                {alumni.profession || "N/A"}{" "}
-                {alumni.job_rank ? `(${alumni.job_rank})` : ""}
-              </span>
-            </div>
+          <TabsContent value="contact" className="mt-4 pr-1 space-y-3">
+            <InfoRow
+              icon={Mail}
+              label="Email"
+              value={alumni.email}
+              href={`mailto:${alumni.email}`}
+            />
+            <InfoRow
+              icon={Phone}
+              label="WhatsApp"
+              value={alumni.whatsapp}
+              href={`https://wa.me/${alumni.whatsapp}`}
+            />
+            <InfoRow
+              icon={Globe}
+              label="Facebook"
+              value={alumni.facebook_link}
+              href={alumni.facebook_link}
+            />
+            <InfoRow
+              icon={MapPin}
+              label="Address"
+              value={address}
+              href={
+                address
+                  ? `https://maps.google.com/?q=${encodeURIComponent(address)}`
+                  : undefined
+              }
+            />
+          </TabsContent>
 
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-blue-500 shrink-0" />
-              <span>{alumni.company || "N/A"}</span>
-            </div>
-          </div>
-        </CardContent>
+          <TabsContent value="academic" className="mt-4 pr-1 space-y-3">
+            <InfoRow icon={BookUser} label="Faculty" value={alumni.faculty} />
+            <InfoRow icon={Calendar} label="Session" value={alumni.session} />
+          </TabsContent>
+        </Tabs>
 
         {(onEdit || onDelete) && (
-          <CardFooter className="flex flex-row flex-wrap justify-end gap-2 pt-2">
+          <CardFooter className="flex flex-row flex-wrap justify-end gap-2 p-0 pt-4">
             {onEdit && (
               <Button
                 variant="outline"

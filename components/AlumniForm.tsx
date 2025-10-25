@@ -22,6 +22,7 @@ import {
 import { Save, UserPlus, X } from "lucide-react";
 
 import { AlumniRecord, FormState } from "@/lib/types";
+import Link from "next/link";
 
 const SESSION_OPTIONS = [
   "2024-25",
@@ -184,8 +185,8 @@ export default function AlumniForm({
       </CardHeader>
       <form onSubmit={handleFormSubmit}>
         <CardContent className="space-y-8">
-          <fieldset className="space-y-4 border p-4 rounded-lg">
-            <legend className="text-lg font-semibold px-2">
+          <fieldset className="space-y-4  rounded-lg">
+            <legend className="text-lg font-semibold">
               Personal & Contact Info
             </legend>
             <div className="space-y-8">
@@ -195,19 +196,15 @@ export default function AlumniForm({
               {renderTextInput("facebook_link", "Facebook Profile Link")}
             </div>
           </fieldset>
-          <fieldset className="space-y-4 border p-4 rounded-lg">
-            <legend className="text-lg font-semibold px-2">
-              Academic Details
-            </legend>
+          <fieldset className="space-y-4  rounded-lg">
+            <legend className="text-lg font-semibold">Academic Details</legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {renderTextInput("session", "Academic Session (e.g. 2019-20)")}
               {renderSelect("faculty", FACULTY_OPTIONS, "Faculty/Department")}
             </div>
           </fieldset>
-          <fieldset className="space-y-4 border p-4 rounded-lg">
-            <legend className="text-lg font-semibold px-2">
-              Career & Location
-            </legend>
+          <fieldset className="space-y-4  rounded-lg">
+            <legend className="text-lg font-semibold">Career & Location</legend>
             {renderSelect(
               "profession",
               PROFESSION_OPTIONS,
@@ -225,21 +222,32 @@ export default function AlumniForm({
             </div>
           </fieldset>
           <div className="space-y-2 pt-4">
-            <Label htmlFor="image">{isEdit ? "Change Avatar" : "Avatar"}</Label>
+            <Label htmlFor="image">{isEdit ? "Change Image" : "Image"}</Label>
             <Input
               id="image"
               type="file"
               onChange={handleFileChange}
               accept="image/*"
             />
-            {isEdit && form.image && !avatarFile && (
-              <p className="text-xs text-muted-foreground">
-                Current image is set. Select a new file to replace it.
-              </p>
-            )}
+
+            <p className="text-xs text-muted-foreground">
+              {isEdit &&
+                form.image &&
+                !avatarFile &&
+                "Current image is set. Select a new file to replace it. "}
+              <strong>Max file size is 1MB.</strong>
+              <span>
+                Use{" "}
+                <Link href={"https://www.compress2go.com"}>
+                  {" "}
+                  https://www.compress2go.com
+                </Link>{" "}
+                to reduce image size.
+              </span>
+            </p>
           </div>
         </CardContent>
-        <CardFooter className={isEdit ? "flex justify-end gap-2" : ""}>
+        <CardFooter className={isEdit ? "flex justify-end gap-2 mt-4" : "mt-4"}>
           {isEdit && onCancel && (
             <Button
               variant="outline"

@@ -13,6 +13,12 @@ export default function Footer() {
 
         <nav className="flex items-center gap-4">
           <Link
+            href="/"
+            className="hover:text-foreground transition-colors font-medium text-sm"
+          >
+            Home
+          </Link>
+          <Link
             href="/admin"
             className="hover:text-foreground transition-colors font-medium text-sm"
           >
