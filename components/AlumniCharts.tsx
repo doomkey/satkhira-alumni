@@ -20,8 +20,15 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SquareUser, UserPen } from "lucide-react";
 
 const chartColors = [
   "var(--chart-1)",
@@ -204,7 +211,7 @@ const UpazillaRadarChart = ({ data }) => {
   );
 };
 
-const AlumniCharts = ({ data }) => {
+const AlumniCharts = ({ data, pending = 0 }) => {
   if (!data) {
     return (
       <div className="p-4 grid gap-6 md:grid-cols-2">
@@ -225,13 +232,31 @@ const AlumniCharts = ({ data }) => {
   }
 
   return (
-    <div className="p-6">
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
-        <FacultyBarChart data={data} />
-        <ProfessionPieChart data={data} />
-        <UpazillaRadarChart data={data} />
-        <SessionLineChart data={data} />
-      </div>
+    <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+      <Card className="">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold flex gap-4">
+            <SquareUser />
+            {data.length}
+          </CardTitle>
+          <CardDescription>Total Alumni</CardDescription>
+        </CardHeader>
+      </Card>
+      <Card className=" bg-primary">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold flex gap-4 text-primary-foreground">
+            <UserPen />
+            {pending}
+          </CardTitle>
+          <CardDescription className="text-primary-foreground">
+            Alumni to Approve
+          </CardDescription>
+        </CardHeader>
+      </Card>
+      <FacultyBarChart data={data} />
+      <ProfessionPieChart data={data} />
+      <UpazillaRadarChart data={data} />
+      <SessionLineChart data={data} />
     </div>
   );
 };

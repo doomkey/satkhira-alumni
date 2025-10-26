@@ -32,6 +32,7 @@ import {
   Menu,
   MessageSquareText,
   BookDashed,
+  CircleCheckBig,
 } from "lucide-react";
 import AlumniCharts from "@/components/AlumniCharts";
 
@@ -289,7 +290,7 @@ export default function AdminPage() {
         <NavLink icon={BookDashed} label="Dashboard" view="dashboard" />
         <NavLink icon={Users} label="View Alumni" view="view" />
         <NavLink icon={UserPlus} label="Add New Alumni" view="add" />
-        <NavLink icon={UserPlus} label="Approve Alumni" view="pending" />
+        <NavLink icon={CircleCheckBig} label="Approve Alumni" view="pending" />
 
         {activeView === "edit" && (
           <Button variant="secondary" className="w-full justify-start" disabled>
@@ -385,7 +386,7 @@ export default function AdminPage() {
           />
         );
       case "dashboard":
-        return <AlumniCharts data={alumni} />;
+        return <AlumniCharts data={alumni} pending={pendingAlumni.length} />;
       default:
         return null;
     }
