@@ -94,10 +94,10 @@ export default function SubmitDataPage() {
       localStorage.setItem("alumni_form_submitted", "true");
       setStep("done");
       setFormSubmitted(true);
-      toast.success("✅ Thank you! Your data has been submitted.");
+      toast.success("Thank you! Your data has been submitted.");
     } catch (err) {
       console.error(err);
-      toast.error("❌ Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -110,7 +110,7 @@ export default function SubmitDataPage() {
     setAvatarFile(null);
     setAvatarPreview(null);
     setStep("form");
-    toast("🔁 Form reset for testing");
+    toast("Form reset for testing");
   };
 
   return (
@@ -127,14 +127,14 @@ export default function SubmitDataPage() {
       )}
 
       {step === "review" && (
-        <Card className="border-blue-300 bg-blue-50 dark:bg-blue-900/20">
+        <Card className="">
           <CardHeader>
             <CardTitle className="text-center">Review Your Data</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             {avatarPreview && (
               <div className="flex justify-center mb-2">
-                <Avatar className="h-20 w-20 border border-blue-300">
+                <Avatar className="h-20 w-20 border">
                   <AvatarImage src={avatarPreview} alt={formData.name} />
                   <AvatarFallback>
                     {formData.name?.charAt(0).toUpperCase() || "?"}
@@ -144,16 +144,26 @@ export default function SubmitDataPage() {
             )}
 
             <div className="space-y-2">
-              {Object.entries(formData).map(([key, value]) => (
-                <div key={key} className="flex justify-between border-b py-1">
-                  <span className="font-medium capitalize">
-                    {key.replace("_", " ")}:
-                  </span>
-                  <span className="text-muted-foreground text-right break-all">
-                    {value ? value : "—"}
-                  </span>
-                </div>
-              ))}
+              {Object.entries(formData)
+                .filter(([key, value]) => {
+                  if (key === "image") return false;
+                  if (
+                    formData.profession === "Student" &&
+                    (key === "job_rank" || key === "company")
+                  )
+                    return false;
+                  return true;
+                })
+                .map(([key, value]) => (
+                  <div key={key} className="flex justify-between py-1">
+                    <span className="font-medium capitalize">
+                      {key.replace("_", " ")}:
+                    </span>
+                    <span className="text-muted-foreground text-right break-all">
+                      {value ? value : "—"}
+                    </span>
+                  </div>
+                ))}
             </div>
 
             <div className="flex justify-center gap-3 pt-4">
@@ -162,10 +172,10 @@ export default function SubmitDataPage() {
                 onClick={() => setStep("form")}
                 disabled={submitting}
               >
-                ✏️ Edit
+                Edit
               </Button>
               <Button onClick={handleFinalSubmit} disabled={submitting}>
-                ✅ Confirm & Submit
+                Confirm & Submit
               </Button>
             </div>
           </CardContent>
@@ -173,10 +183,10 @@ export default function SubmitDataPage() {
       )}
 
       {step === "done" && (
-        <Card className="border-green-300 bg-green-50 dark:bg-green-900/20">
-          <CardContent className="p-6 text-center text-green-700 dark:text-green-300 font-medium space-y-3">
-            <p>✅ Your information has been successfully submitted!</p>
-            <p>Our team will review and confirm it soon.</p>
+        <Card className="">
+          <CardContent className="p-6 text-center  font-medium space-y-3">
+            <p>Your information has been successfully submitted!</p>
+            <p>An admin will review and confirm it soon.</p>
 
             {process.env.NODE_ENV === "development" && (
               <Button
@@ -185,7 +195,7 @@ export default function SubmitDataPage() {
                 onClick={handleReset}
                 className="mt-3"
               >
-                🔁 Reset (For Testing)
+                Reset (For Testing)
               </Button>
             )}
           </CardContent>

@@ -24,13 +24,7 @@ export default function Hero() {
             <a href="#alumni">View Alumni</a>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <a
-              href="https://forms.gle/BzDuyWih49LGNEDq8"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Submit Your Data
-            </a>
+            <a href="/submit-data">Submit Your Data</a>
           </Button>
         </div>
       </div>
