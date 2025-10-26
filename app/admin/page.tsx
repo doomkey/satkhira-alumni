@@ -2,29 +2,44 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import AlumniCard from "@/components/AlumniCard";
+import { AlumniDataTable } from "@/components/AlumniDataTable";
 import AlumniForm from "@/components/AlumniForm";
+import NoticeForm from "@/components/NoticeForm";
 import { Session } from "@supabase/supabase-js";
 
 import { AlumniRecord, FormState, initialAddFormState } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardContent,
 } from "@/components/ui/card";
-import { UserCog, LogOut, Users, UserPlus, Globe } from "lucide-react";
+import {
+  UserCog,
+  LogOut,
+  Users,
+  UserPlus,
+  Home,
+  Menu,
+  MessageSquareText,
+  BookDashed,
+} from "lucide-react";
+import AlumniCharts from "@/components/AlumniCharts";
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [alumni, setAlumni] = useState<AlumniRecord[]>([]);
-  const [activeTab, setActiveTab] = useState<"view" | "add" | "edit">("view");
+
+  const [activeView, setActiveView] = useState<
+    "view" | "add" | "edit" | "notices" | "dashboard"
+  >("dashboard");
 
   const [editForm, setEditForm] = useState<FormState | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const router = useRouter();
 
@@ -112,7 +127,7 @@ export default function AdminPage() {
     }
 
     await loadAlumni();
-    setActiveTab("view");
+    setActiveView("view");
   }
 
   async function handleDeleteAlumni(alumniId: string) {
@@ -122,10 +137,62 @@ export default function AdminPage() {
     }
   }
 
+  async function handlePostNotice(
+    e: React.FormEvent,
+    title: string,
+    content: string
+  ) {
+    e.preventDefault();
+
+    if (!session?.user?.id) {
+      console.error("User session is missing or invalid.");
+      alert("Authentication error. Please log in again.");
+      return;
+    }
+
+    if (!title || !content) {
+      alert("Title and content are required fields.");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("notices")
+      .insert([
+        {
+          title: title,
+          content: content,
+          created_by: session.user.id,
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Error posting notice:", error);
+      alert(`Failed to post notice: ${error.message}`);
+      return;
+    }
+
+    console.log("Notice posted successfully:", data);
+    alert("Notice posted successfully!");
+
+    setActiveView("view");
+  }
+
   function startEditing(alumnus: AlumniRecord) {
     const fullForm: FormState = { ...initialAddFormState, ...alumnus };
     setEditForm(fullForm);
-    setActiveTab("edit");
+    setActiveView("edit");
+    setIsSidebarOpen(false);
+  }
+
+  function startAdding() {
+    setActiveView("add");
+    setIsSidebarOpen(false);
+  }
+
+  function startNotices() {
+    setActiveView("notices");
+    setIsSidebarOpen(false);
   }
 
   async function logout() {
@@ -133,86 +200,182 @@ export default function AdminPage() {
     router.push("/login");
   }
 
-  return (
-    <main className="max-w-4xl mx-auto p-4 md:p-6">
-      <header className="flex justify-between items-center mb-6 pb-4 border-b">
-        <h1 className="text-3xl font-bold flex items-center gap-2 ">
-          <UserCog className="h-7 w-7" />
-          SAS Admin
-        </h1>
-        <Button onClick={logout} variant="destructive">
-          <LogOut className="mr-2 h-4 w-4" /> Logout
+  const NavLink = ({
+    icon: Icon,
+    label,
+    view,
+  }: {
+    icon: React.ElementType;
+    label: string;
+    view: "view" | "add" | "notices" | "dashboard";
+  }) => (
+    <Button
+      variant={activeView === view ? "secondary" : "ghost"}
+      className="w-full justify-start"
+      onClick={() => {
+        setActiveView(view);
+        setIsSidebarOpen(false);
+      }}
+    >
+      <Icon className="mr-3 h-4 w-4" />
+      {label}
+    </Button>
+  );
+
+  const SidebarContent = () => (
+    <div className="flex flex-col space-y-4 p-4">
+      <div className="space-y-1">
+        <h3 className="text-sm font-semibold uppercase text-muted-foreground">
+          Management
+        </h3>
+        <NavLink icon={BookDashed} label="Dashboard" view="dashboard" />
+        <NavLink icon={Users} label="View Alumni" view="view" />
+        <NavLink icon={UserPlus} label="Add New Alumni" view="add" />
+
+        {activeView === "edit" && (
+          <Button variant="secondary" className="w-full justify-start" disabled>
+            <UserCog className="mr-3 h-4 w-4" /> Editing Record
+          </Button>
+        )}
+      </div>
+      <Separator />
+      <div className="space-y-1">
+        <h3 className="text-sm font-semibold uppercase text-muted-foreground">
+          Account
+        </h3>
+        <Button
+          onClick={logout}
+          variant="ghost"
+          className="w-full justify-start text-red-600 hover:text-red-700"
+        >
+          <LogOut className="mr-3 h-4 w-4" /> Logout
         </Button>
-      </header>
+      </div>
+    </div>
+  );
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(value: string) =>
-          setActiveTab(value as "view" | "add" | "edit")
-        }
-        className="w-full"
-      >
-        <TabsList className="w-full mx-auto">
-          <TabsTrigger value="view">
-            <Users className="mr-2 h-4 w-4" /> View Alumni
-          </TabsTrigger>
-          <TabsTrigger value="add">
-            <UserPlus className="mr-2 h-4 w-4" /> Add New
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="view" className="mt-4">
-          <Card>
+  const renderContent = () => {
+    switch (activeView) {
+      case "view":
+        return (
+          <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Alumni Directory</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" /> Alumni Directory
+              </CardTitle>
               <CardDescription>
-                Browse and manage the alumni directory ({alumni.length}{" "}
-                records).
+                Browse, sort, filter, and manage all {alumni.length} alumni
+                records.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {alumni.length > 0 ? (
-                alumni.map((a) => (
-                  <AlumniCard
-                    key={a.id}
-                    alumni={a} // 'a' is AlumniRecord
-                    onEdit={startEditing} // expects AlumniRecord
-                    onDelete={handleDeleteAlumni}
-                  />
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">
-                  <Globe className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                  No alumni records found.
-                </p>
-              )}
-            </CardContent>
+            <div className="p-6 pt-0">
+              <AlumniDataTable
+                data={alumni}
+                onEdit={startEditing}
+                onDelete={handleDeleteAlumni}
+                onAddNew={startAdding}
+              />
+            </div>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="add" className="mt-4">
+        );
+      case "add":
+        return (
           <AlumniForm
             initialData={initialAddFormState as FormState}
             onSubmit={handleFormSubmit}
+            onCancel={() => setActiveView("view")}
             isEdit={false}
           />
-        </TabsContent>
+        );
+      case "edit":
+        return editForm ? (
+          <AlumniForm
+            initialData={editForm}
+            onSubmit={handleFormSubmit}
+            onCancel={() => setActiveView("view")}
+            isEdit={true}
+          />
+        ) : (
+          <p className="text-center text-muted-foreground py-8">
+            Select an alumnus to edit from the "Alumni Directory" section.
+          </p>
+        );
 
-        <TabsContent value="edit" className="mt-4">
-          {editForm ? (
-            <AlumniForm
-              initialData={editForm}
-              onSubmit={handleFormSubmit}
-              onCancel={() => setActiveTab("view")}
-              isEdit={true}
-            />
-          ) : (
-            <p className="text-center text-muted-foreground py-4">
-              Select an alumnus to edit from the "View Alumni" tab.
+      case "notices":
+        return (
+          <NoticeForm
+            onCancel={() => setActiveView("view")}
+            onSubmit={handlePostNotice}
+          />
+        );
+      case "dashboard":
+        return <AlumniCharts data={alumni} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <header className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-white shadow md:hidden">
+        <h1 className="text-xl font-bold flex items-center gap-2">
+          <UserCog className="h-5 w-5 text-primary" /> SAS Admin
+        </h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+      </header>
+
+      <aside className="hidden w-64 border-r bg-white p-4 pt-10 md:block fixed h-full">
+        <div className="flex items-center gap-2 mb-8 px-2">
+          <UserCog className="h-6 w-6 text-primary" />
+          <h2 className="text-xl font-bold tracking-tight">SAS Admin</h2>
+        </div>
+        <SidebarContent />
+      </aside>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <aside
+            className="fixed left-0 top-0 h-full w-64 bg-white p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6 px-2">
+              <h2 className="text-xl font-bold tracking-tight">Navigation</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                &times;
+              </Button>
+            </div>
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
+
+      <main className="flex-1 p-4 md:ml-64 md:p-8 pt-20 md:pt-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Welcome Back, Admin!
+            </h2>
+            <p className="text-muted-foreground">
+              Manage the alumni records and settings.
             </p>
-          )}
-        </TabsContent>
-      </Tabs>
-    </main>
+          </div>
+
+          {renderContent()}
+        </div>
+      </main>
+    </div>
   );
 }
