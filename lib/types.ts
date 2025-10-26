@@ -26,3 +26,7 @@ export type AlumniRecord = AlumniBase & {
   created_by: string | null;
   created_at: string;
 };
+
+export type PendingAlumniRecord = AlumniRecord & {
+  is_confirmed: boolean
+}

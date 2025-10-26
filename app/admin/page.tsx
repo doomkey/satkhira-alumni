@@ -7,7 +7,12 @@ import AlumniForm from "@/components/AlumniForm";
 import NoticeForm from "@/components/NoticeForm";
 import { Session } from "@supabase/supabase-js";
 
-import { AlumniRecord, FormState, initialAddFormState } from "@/lib/types";
+import {
+  AlumniRecord,
+  FormState,
+  initialAddFormState,
+  PendingAlumniRecord,
+} from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -33,9 +38,10 @@ import AlumniCharts from "@/components/AlumniCharts";
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [alumni, setAlumni] = useState<AlumniRecord[]>([]);
+  const [pendingAlumni, setPendingAlumni] = useState<PendingAlumniRecord[]>([]);
 
   const [activeView, setActiveView] = useState<
-    "view" | "add" | "edit" | "notices" | "dashboard"
+    "view" | "add" | "edit" | "notices" | "dashboard" | "pending"
   >("dashboard");
 
   const [editForm, setEditForm] = useState<FormState | null>(null);
@@ -50,6 +56,7 @@ export default function AdminPage() {
       } else {
         setSession(data.session);
         loadAlumni();
+        loadPendingAlumni();
       }
     });
   }, [router]);
@@ -65,8 +72,21 @@ export default function AdminPage() {
       setAlumni([]);
       return;
     }
-
     setAlumni((data as AlumniRecord[]) || []);
+  }
+  async function loadPendingAlumni() {
+    const { data, error } = await supabase
+      .from("pending_alumni")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.log("Error loading pending alumni", error);
+      setPendingAlumni([]);
+      return;
+    }
+    setPendingAlumni((data as PendingAlumniRecord[]) || []);
+    console.log(data);
   }
 
   async function uploadAvatar(file: File): Promise<string | null> {
@@ -189,6 +209,44 @@ export default function AdminPage() {
     setActiveView("add");
     setIsSidebarOpen(false);
   }
+  async function startApprove(id: string) {
+    try {
+      const approveAlumni = pendingAlumni.find((a) => a.id === id);
+      if (!approveAlumni) {
+        alert("Alumni not found.");
+        return;
+      }
+
+      const { is_confirmed, ...cleanedAlumni } = approveAlumni;
+
+      const { error: insertError } = await supabase
+        .from("alumni")
+        .insert(cleanedAlumni);
+
+      if (insertError) {
+        console.error("Error approving:", insertError);
+        alert(`Failed to approve: ${insertError.message}`);
+        return;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("pending_alumni")
+        .delete()
+        .eq("id", id);
+
+      if (deleteError) {
+        console.error("Error deleting from pending:", deleteError);
+        alert(`Failed to remove pending alumni: ${deleteError.message}`);
+        return;
+      }
+
+      await loadAlumni();
+      await loadPendingAlumni();
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      alert("An unexpected error occurred.");
+    }
+  }
 
   function startNotices() {
     setActiveView("notices");
@@ -207,7 +265,7 @@ export default function AdminPage() {
   }: {
     icon: React.ElementType;
     label: string;
-    view: "view" | "add" | "notices" | "dashboard";
+    view: "view" | "add" | "notices" | "dashboard" | "pending";
   }) => (
     <Button
       variant={activeView === view ? "secondary" : "ghost"}
@@ -231,6 +289,7 @@ export default function AdminPage() {
         <NavLink icon={BookDashed} label="Dashboard" view="dashboard" />
         <NavLink icon={Users} label="View Alumni" view="view" />
         <NavLink icon={UserPlus} label="Add New Alumni" view="add" />
+        <NavLink icon={UserPlus} label="Approve Alumni" view="pending" />
 
         {activeView === "edit" && (
           <Button variant="secondary" className="w-full justify-start" disabled>
@@ -275,6 +334,23 @@ export default function AdminPage() {
                 onDelete={handleDeleteAlumni}
                 onAddNew={startAdding}
               />
+            </div>
+          </Card>
+        );
+      case "pending":
+        return (
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" /> Alumni Directory
+              </CardTitle>
+              <CardDescription>
+                Browse, sort, filter, and manage all {pendingAlumni.length}{" "}
+                alumni records.
+              </CardDescription>
+            </CardHeader>
+            <div className="p-6 pt-0">
+              <AlumniDataTable data={pendingAlumni} onApprove={startApprove} />
             </div>
           </Card>
         );

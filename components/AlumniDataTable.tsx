@@ -28,9 +28,10 @@ import { Pencil, Trash2, ArrowUpDown, UserPlus } from "lucide-react";
 
 interface AlumniDataTableProps {
   data: AlumniRecord[];
-  onEdit: (alumni: AlumniRecord) => void;
-  onDelete: (alumniId: string) => void;
-  onAddNew: () => void;
+  onEdit?: (alumni: AlumniRecord) => void;
+  onDelete?: (alumniId: string) => void;
+  onAddNew?: () => void;
+  onApprove?: (alumniId: string) => void;
 }
 
 export const columns: ColumnDef<AlumniRecord>[] = [
@@ -115,30 +116,47 @@ export const columns: ColumnDef<AlumniRecord>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row, table }) => {
-      const { onEdit, onDelete } = table.options.meta as {
+      const { onEdit, onDelete, onApprove } = table.options.meta as {
         onEdit: (a: AlumniRecord) => void;
         onDelete: (id: string) => void;
+        onApprove?: (alumniId: string) => void;
       };
       const alumni = row.original;
 
       return (
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onEdit(alumni)}
-            aria-label={`Edit ${alumni.name}`}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={() => onDelete(alumni.id)}
-            aria-label={`Delete ${alumni.name}`}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => onEdit(alumni)}
+              aria-label={`Edit ${alumni.name}`}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => onDelete(alumni.id)}
+              aria-label={`Delete ${alumni.name}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+          {onApprove && (
+            <Button
+              variant="default"
+              size="icon"
+              onClick={() => onApprove(alumni.id)}
+              aria-label={`Approve`}
+              className="w-full"
+            >
+              Approve
+              {/* <Trash2 className="h-4 w-4" /> */}
+            </Button>
+          )}
         </div>
       );
     },
@@ -150,6 +168,7 @@ export function AlumniDataTable({
   onEdit,
   onDelete,
   onAddNew,
+  onApprove,
 }: AlumniDataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -171,6 +190,7 @@ export function AlumniDataTable({
     meta: {
       onEdit,
       onDelete,
+      onApprove,
     },
   });
 

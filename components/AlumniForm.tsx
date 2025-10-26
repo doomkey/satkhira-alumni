@@ -20,27 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Save, UserPlus, X } from "lucide-react";
-
-import { AlumniRecord, FormState } from "@/lib/types";
 import Link from "next/link";
+import { AlumniRecord, FormState } from "@/lib/types";
 
-const SESSION_OPTIONS = [
-  "2024-25",
-  "2023-24",
-  "2022-23",
-  "2021-22",
-  "2020-21",
-  "2019-20",
-  "2018-19",
-  "2017-18",
-  "2016-17",
-  "2015-16",
-  "2014-15",
-  "2013-14",
-  "2012-13",
-  "2011-12",
-  "2010-11",
-];
 const FACULTY_OPTIONS = [
   "Agriculture",
   "Animal Science and Veterinary Medicine",
@@ -71,6 +53,7 @@ interface AlumniFormProps {
   ) => void | Promise<void>;
   onCancel?: () => void;
   isEdit?: boolean;
+  disabled?: boolean;
 }
 
 export default function AlumniForm({
@@ -78,13 +61,18 @@ export default function AlumniForm({
   onSubmit,
   onCancel,
   isEdit = false,
+  disabled = false,
 }: AlumniFormProps) {
   const [form, setForm] = useState<FormState>(initialData);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof FormState, string>>
+  >({});
 
   useEffect(() => {
     setForm(initialData);
     setAvatarFile(null);
+    setErrors({});
   }, [initialData]);
 
   const handleChange = (field: keyof FormState, value: string) => {
@@ -98,24 +86,59 @@ export default function AlumniForm({
 
       return newState;
     });
+
+    setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAvatarFile(e.target.files ? e.target.files[0] : null);
+    const file = e.target.files ? e.target.files[0] : null;
+    setAvatarFile(file);
+    if (file && file.size > 1024 * 1024) {
+      setErrors((prev) => ({
+        ...prev,
+        image: "Image must be less than 1MB.",
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, image: "" }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof FormState, string>> = {};
+
+    const requiredFields: (keyof FormState)[] = [
+      "name",
+      "faculty",
+      "session",
+      "upazilla",
+      "profession",
+    ];
+    for (const field of requiredFields) {
+      if (!form[field] || (form[field] as string).trim() === "") {
+        newErrors[field] = "This field is required.";
+      }
+    }
+
+    if (form.session && !/^\d{4}-\d{2}$/.test(form.session)) {
+      newErrors.session = "Session must be in YYYY-YY format (e.g. 2019-20).";
+    }
+
+    if (form.profession === "Job Holder") {
+      if (!form.job_rank) newErrors.job_rank = "Job Rank is required.";
+      if (!form.company) newErrors.company = "Company is required.";
+    }
+
+    if (avatarFile && avatarFile.size > 1024 * 1024) {
+      newErrors.image = "Image must be less than 1MB.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.faculty || !form.session) {
-      alert("Name, Faculty, and Session are required.");
-      return;
-    }
-
-    if (form.profession === "Job Holder" && (!form.job_rank || !form.company)) {
-      alert("Job Rank and Company are required for Job Holders.");
-      return;
-    }
-
+    if (!validateForm()) return;
     onSubmit(e, form, avatarFile);
   };
 
@@ -129,9 +152,6 @@ export default function AlumniForm({
       <Select
         value={(form[field] as string) || ""}
         onValueChange={(value) => handleChange(field, value)}
-        required={
-          field === "session" || field === "faculty" || field === "profession"
-        }
       >
         <SelectTrigger id={field}>
           <SelectValue placeholder={`Select ${label}`} />
@@ -147,6 +167,9 @@ export default function AlumniForm({
           </SelectGroup>
         </SelectContent>
       </Select>
+      {errors[field] && (
+        <p className="text-sm text-destructive">{errors[field]}</p>
+      )}
     </div>
   );
 
@@ -164,8 +187,10 @@ export default function AlumniForm({
         placeholder={`Enter ${label}`}
         value={(form[field] as string) || ""}
         onChange={(e) => handleChange(field, e.target.value)}
-        required={required}
       />
+      {errors[field] && (
+        <p className="text-sm text-destructive">{errors[field]}</p>
+      )}
     </div>
   );
 
@@ -183,9 +208,10 @@ export default function AlumniForm({
             : "Fill out the form to add a new record."}
         </CardDescription>
       </CardHeader>
+
       <form onSubmit={handleFormSubmit}>
         <CardContent className="space-y-8">
-          <fieldset className="space-y-4  rounded-lg">
+          <fieldset className="space-y-4 rounded-lg">
             <legend className="text-lg font-semibold">
               Personal & Contact Info
             </legend>
@@ -196,14 +222,16 @@ export default function AlumniForm({
               {renderTextInput("facebook_link", "Facebook Profile Link")}
             </div>
           </fieldset>
-          <fieldset className="space-y-4  rounded-lg">
+
+          <fieldset className="space-y-4 rounded-lg">
             <legend className="text-lg font-semibold">Academic Details</legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {renderTextInput("session", "Academic Session (e.g. 2019-20)")}
               {renderSelect("faculty", FACULTY_OPTIONS, "Faculty/Department")}
             </div>
           </fieldset>
-          <fieldset className="space-y-4  rounded-lg">
+
+          <fieldset className="space-y-4 rounded-lg">
             <legend className="text-lg font-semibold">Career & Location</legend>
             {renderSelect(
               "profession",
@@ -221,6 +249,7 @@ export default function AlumniForm({
               {renderTextInput("village", "Village/Area")}
             </div>
           </fieldset>
+
           <div className="space-y-2 pt-4">
             <Label htmlFor="image">{isEdit ? "Change Image" : "Image"}</Label>
             <Input
@@ -229,6 +258,9 @@ export default function AlumniForm({
               onChange={handleFileChange}
               accept="image/*"
             />
+            {errors.image && (
+              <p className="text-sm text-destructive">{errors.image}</p>
+            )}
 
             <p className="text-xs text-muted-foreground">
               {isEdit &&
@@ -237,35 +269,42 @@ export default function AlumniForm({
                 "Current image is set. Select a new file to replace it. "}
               <strong>Max file size is 1MB.</strong>
               <span>
-                Use{" "}
-                <Link href={"https://www.compress2go.com"}>
-                  {" "}
-                  https://www.compress2go.com
-                </Link>{" "}
+                Use
+                <Link
+                  href={"https://www.compress2go.com"}
+                  className="underline"
+                >
+                  compress2go.com
+                </Link>
                 to reduce image size.
               </span>
             </p>
           </div>
         </CardContent>
+
         <CardFooter className={isEdit ? "flex justify-end gap-2 mt-4" : "mt-4"}>
           {isEdit && onCancel && (
             <Button
               variant="outline"
               type="button"
               onClick={onCancel}
-              className=" my-4"
+              className="my-4"
             >
               <X className="mr-2 h-4 w-4" /> Cancel
             </Button>
           )}
-          <Button type="submit" className={isEdit ? "" : "w-full"}>
+          <Button
+            type="submit"
+            className={isEdit ? "" : "w-full"}
+            disabled={disabled}
+          >
             {isEdit ? (
               <>
                 <Save className="mr-2 h-4 w-4" /> Save Changes
               </>
             ) : (
               <>
-                <UserPlus className="mr-2 h-4 w-4" /> Add Alumni
+                <UserPlus className="mr-2 h-4 w-4" /> Review Information
               </>
             )}
           </Button>
