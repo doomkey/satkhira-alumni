@@ -33,7 +33,7 @@ const FACULTY_OPTIONS = [
   "Law and Land Administration",
   "Nutrition and Food Science",
 ];
-const PROFESSION_OPTIONS = ["Student", "Job Holder"];
+const PROFESSION_OPTIONS = ["Student", "Job Holder", "Teacher"];
 const UPAZILLA_OPTIONS = [
   "Assasuni",
   "Debhata",
@@ -79,7 +79,7 @@ export default function AlumniForm({
     setForm((prev) => {
       const newState = { ...prev, [field]: value };
 
-      if (field === "profession" && value !== "Job Holder") {
+      if (field === "profession" && value === "Student") {
         newState.job_rank = "";
         newState.company = "";
       }
@@ -127,7 +127,10 @@ export default function AlumniForm({
       if (!form.job_rank) newErrors.job_rank = "Job Rank is required.";
       if (!form.company) newErrors.company = "Company is required.";
     }
-
+    if (form.profession === "Teacher") {
+      if (!form.job_rank) newErrors.job_rank = "Designation is required.";
+      if (!form.company) newErrors.company = "Department is required.";
+    }
     if (avatarFile && avatarFile.size > 1024 * 1024) {
       newErrors.image = "Image must be less than 1MB.";
     }
@@ -193,9 +196,21 @@ export default function AlumniForm({
       )}
     </div>
   );
+  const [jobRankText, setJobRankText] = useState("");
+  const [companyText, setCompanyText] = useState("");
 
-  const isJobHolder = form.profession === "Job Holder";
+  useEffect(() => {
+    if (form.profession === "Job Holder") {
+      setJobRankText("Job Rank");
+      setCompanyText("Company/Organization Name");
+    } else if (form.profession === "Teacher") {
+      setJobRankText("Designation");
+      setCompanyText("Department");
+    }
+  }, [form.profession]);
 
+  const isJobHolder =
+    form.profession === "Job Holder" || form.profession === "Teacher";
   return (
     <Card>
       <CardHeader>
@@ -240,8 +255,8 @@ export default function AlumniForm({
             )}
             {isJobHolder && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {renderTextInput("job_rank", "Job Rank/Title", true)}
-                {renderTextInput("company", "Company/Organization Name", true)}
+                {renderTextInput("job_rank", jobRankText, true)}
+                {renderTextInput("company", companyText, true)}
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -304,7 +319,7 @@ export default function AlumniForm({
               </>
             ) : (
               <>
-                <UserPlus className="mr-2 h-4 w-4" /> Review Information
+                <UserPlus className="mr-2 h-4 w-4" /> Submit
               </>
             )}
           </Button>
