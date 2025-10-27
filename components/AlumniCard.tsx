@@ -96,26 +96,28 @@ export default function AlumniCard({
               {alumni.name}
             </h3>
             <p className="text-base text-primary font-medium">
-              {alumni.profession || "Profession N/A"}
+              {alumni.profession === "Student"
+                ? "Student"
+                : `${alumni.job_rank} at ${alumni.company}`}
             </p>
           </div>
         </div>
-
-        <Tabs defaultValue="contact" className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger value="contact">Contact</TabsTrigger>
-            {alumni.profession == "Job Holder" && (
-              <TabsTrigger value="work">Work</TabsTrigger>
-            )}
-            <TabsTrigger value="academic">Academic</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="work" className="mt-4 pr-1 space-y-3">
-            <InfoRow icon={Building2} label="Company" value={alumni.company} />
-            <InfoRow icon={Pencil} label="Job Rank" value={alumni.job_rank} />
-          </TabsContent>
-
-          <TabsContent value="contact" className="mt-4 pr-1 space-y-3">
+        <div className="grid md:grid-cols-2 gap-2 sm:gap-4">
+          <div>
+            <InfoRow icon={BookUser} label="Faculty" value={alumni.faculty} />
+            <InfoRow icon={Calendar} label="Session" value={alumni.session} />
+            <InfoRow
+              icon={MapPin}
+              label="Address"
+              value={address}
+              href={
+                address
+                  ? `https://maps.google.com/?q=${encodeURIComponent(address)}`
+                  : undefined
+              }
+            />
+          </div>
+          <div>
             <InfoRow
               icon={Mail}
               label="Email"
@@ -134,23 +136,8 @@ export default function AlumniCard({
               value={alumni.facebook_link}
               href={alumni.facebook_link}
             />
-            <InfoRow
-              icon={MapPin}
-              label="Address"
-              value={address}
-              href={
-                address
-                  ? `https://maps.google.com/?q=${encodeURIComponent(address)}`
-                  : undefined
-              }
-            />
-          </TabsContent>
-
-          <TabsContent value="academic" className="mt-4 pr-1 space-y-3">
-            <InfoRow icon={BookUser} label="Faculty" value={alumni.faculty} />
-            <InfoRow icon={Calendar} label="Session" value={alumni.session} />
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
 
         {(onEdit || onDelete) && (
           <CardFooter className="flex flex-row flex-wrap justify-end gap-2 p-0 pt-4">

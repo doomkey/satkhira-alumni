@@ -6,25 +6,16 @@ import SortControls from "@/components/SortControls";
 import FilterControls from "@/components/FilterControls";
 import { Alumni } from "@/app/page";
 import { AlumniRecord } from "@/lib/types";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
 
 type SortKey = "name" | "session" | "profession" | "upazilla" | "faculty";
 type Order = "asc" | "desc";
 type FilterKey = SortKey | "";
 
-const VALID_SORT_KEYS: SortKey[] = [
-  "name",
-  "session",
-  "profession",
-  "upazilla",
-  "faculty",
-];
+const VALID_SORT_KEYS: SortKey[] = ["name", "session", "upazilla", "faculty"];
 
-const VALID_FILTER_KEYS: SortKey[] = [
-  "session",
-  "profession",
-  "upazilla",
-  "faculty",
-];
+const VALID_FILTER_KEYS: SortKey[] = ["session", "upazilla", "faculty"];
 
 const PRIORITY_KEYS: SortKey[] = ["session", "profession"];
 
@@ -44,8 +35,11 @@ const getUniqueOptions = (alumni: AlumniRecord[], key: SortKey): string[] => {
 };
 
 export default function ClientHome({ initialAlumni }: ClientHomeProps) {
+  const [professionFilter, setProfessionFilter] =
+    useState<string>("Job Holder");
+
   // Sorting State
-  const [sortBy, setSortBy] = useState<SortKey>("profession");
+  const [sortBy, setSortBy] = useState<SortKey>("session");
   const [order, setOrder] = useState<Order>("asc");
 
   // Filtering State
@@ -60,18 +54,25 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
   }, [initialAlumni, filterKey]);
 
   const processedAlumni = useMemo(() => {
-    if (!initialAlumni || initialAlumni.length === 0) {
-      return [];
-    }
+    if (!initialAlumni?.length) return [];
 
-    let filtered = initialAlumni;
+    let filtered = initialAlumni.filter((alumnus) => {
+      let matches = true;
 
-    if (filterKey && filterValue) {
-      filtered = initialAlumni.filter((alumnus) => {
-        const alumnusValue = String(alumnus[filterKey as keyof Alumni]);
-        return alumnusValue === filterValue;
-      });
-    }
+      if (filterKey && filterValue) {
+        const alumnusValue = alumnus[filterKey as keyof Alumni];
+        matches = matches && alumnusValue === filterValue;
+      }
+
+      if (professionFilter) {
+        console.log(alumnus.profession);
+
+        matches =
+          matches && alumnus.profession === (professionFilter || "Student");
+      }
+
+      return matches;
+    });
 
     const compare = (a: any, b: any, sortOrder: Order) => {
       const valA = String(a).toLowerCase();
@@ -100,20 +101,34 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
     });
 
     return sorted;
-  }, [initialAlumni, sortBy, order, filterKey, filterValue]);
+  }, [initialAlumni, sortBy, order, filterKey, filterValue, professionFilter]);
 
   const handleSortByChange = (key: SortKey) => setSortBy(key);
   const handleOrderToggle = () => setOrder(order === "asc" ? "desc" : "asc");
+  const handleProfessionToggle = (value: string) => {
+    console.log(value);
 
+    setProfessionFilter(value);
+  };
   const handleFilterKeyChange = (key: FilterKey) => {
     setFilterKey(key);
     setFilterValue("");
   };
 
   const handleFilterValueChange = (value: string) => setFilterValue(value);
+  console.log(professionFilter);
 
   return (
-    <>
+    <div className="min-h-screen">
+      <div className="pb-4">
+        <Tabs value={professionFilter} onValueChange={setProfessionFilter}>
+          <TabsList>
+            <TabsTrigger value="Job Holder"> Meritorious Students</TabsTrigger>
+            <TabsTrigger value="Student">Students</TabsTrigger>
+            <TabsTrigger value="Teacher">Teachers</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
         <FilterControls
           currentFilterKey={filterKey}
@@ -141,6 +156,6 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
