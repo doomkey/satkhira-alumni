@@ -182,6 +182,7 @@
 
 body {
   letter-spacing: var(--tracking-normal);
+  font-family: var(--font-roboto);
 }
 
 body {
