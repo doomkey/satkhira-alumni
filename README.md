@@ -1,6 +1,8 @@
 
 # Database for Student Association of Satkhira
 
+![Poster](./public/poster.png)
+
 A database for connecting the alumni of Satkhira district in Patuakhali Science and Technology University. Alumni can submit their information to be available to the others.
 
 ## Features

@@ -215,7 +215,7 @@ export default function AlumniForm({
     <Card>
       <CardHeader>
         <CardTitle>
-          {isEdit ? "Edit Alumni Record" : "Add New Alumni"}
+          {isEdit ? "Edit Alumni Record" : "Add New Alumnus"}
         </CardTitle>
         <CardDescription>
           {isEdit
