@@ -44,12 +44,45 @@ export default function AdminPage() {
   const [activeView, setActiveView] = useState<
     "view" | "add" | "edit" | "notices" | "dashboard" | "pending"
   >("dashboard");
+  const [viewInfo, setViewInfo] = useState<{ title: string; subtitle: string }>(
+    { title: "Dashboard", subtitle: "Overview of alumni statistics" }
+  );
 
+  const viewInfoMap = [
+    {
+      key: "view",
+      title: "Alumni Directory",
+      subtitle: "Browse, sort, filter, and manage all alumni records.",
+    },
+    {
+      key: "add",
+      title: "Add New Alumnus",
+      subtitle: "Fill out the form to add a new alumnus record.",
+    },
+    {
+      key: "edit",
+      title: "Edit Alumnus Record",
+      subtitle: "Modify the details of the selected alumnus.",
+    },
+    {
+      key: "dashboard",
+      title: "Dashboard",
+      subtitle: "Overview of alumni statistics",
+    },
+    {
+      key: "pending",
+      title: "Approve Alumni",
+      subtitle: "Review and approve submitted entries",
+    },
+  ];
   const [editForm, setEditForm] = useState<FormState | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const router = useRouter();
-
+  useEffect(() => {
+    const { key, ...active } = viewInfoMap.find((a) => a.key === activeView)!;
+    setViewInfo(active);
+  }, [activeView]);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
@@ -87,7 +120,6 @@ export default function AdminPage() {
       return;
     }
     setPendingAlumni((data as PendingAlumniRecord[]) || []);
-    console.log(data);
   }
 
   async function uploadAvatar(file: File): Promise<string | null> {
@@ -440,18 +472,13 @@ export default function AdminPage() {
       )}
 
       <main className="flex-1 p-4 md:ml-64 md:p-8 pt-20 md:pt-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold tracking-tight">
-              Welcome Back, Admin!
-            </h2>
-            <p className="text-muted-foreground">
-              Manage the alumni records and settings.
-            </p>
-          </div>
-
-          {renderContent()}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold tracking-tight">
+            {viewInfo.title}
+          </h2>
+          <p className="text-muted-foreground">{viewInfo.subtitle}</p>
         </div>
+        <div className="max-w-7xl mx-auto">{renderContent()}</div>
       </main>
     </div>
   );

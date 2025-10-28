@@ -106,8 +106,6 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
   const handleSortByChange = (key: SortKey) => setSortBy(key);
   const handleOrderToggle = () => setOrder(order === "asc" ? "desc" : "asc");
   const handleProfessionToggle = (value: string) => {
-    console.log(value);
-
     setProfessionFilter(value);
   };
   const handleFilterKeyChange = (key: FilterKey) => {
@@ -116,7 +114,6 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
   };
 
   const handleFilterValueChange = (value: string) => setFilterValue(value);
-  console.log(professionFilter);
 
   return (
     <div className="min-h-screen">
