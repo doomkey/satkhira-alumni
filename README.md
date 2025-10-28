@@ -1,16 +1,27 @@
-# Database for Student Association of Satkhira, Patuakhali Science and Technology University
 
-## Technologies Used
+# Database for Student Association of Satkhira
 
-- Next.js
-- Shadcn
-- Supabase
-- Vercel
+A database for connecting the alumni of Satkhira district in Patuakhali Science and Technology University. Alumni can submit their information to be available to the others.
 
-## Features Implemented
+## Features
 
 - List, filter and sort the alumni database
 - Alumni data submission form with strict validation check
 - Photo uploading
 - A modern admin dashboard with charts and statistics
 - Moderation of alumni
+
+## Tech Stack
+
+- Next.js
+- Shadcn
+- Supabase
+- Vercel
+
+## Acknowledgements
+
+- Supabase starter guide
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
