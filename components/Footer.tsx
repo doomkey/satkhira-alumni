@@ -7,7 +7,11 @@ export default function Footer() {
         <p className="text-center sm:text-left">
           &copy; {new Date().getFullYear()} Student Association of Satkhira.
           <span className="ml-1 text-xs">
-            Developed by <strong>Doomkey</strong>.
+            Developed by{" "}
+            <strong>
+              <Link href={"https://facebook.com/doomkey.apps"}>Doomkey</Link>
+            </strong>
+            .
           </span>
         </p>
 
