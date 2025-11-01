@@ -120,7 +120,7 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
       <div className="pb-4">
         <Tabs value={professionFilter} onValueChange={setProfessionFilter}>
           <TabsList>
-            <TabsTrigger value="Job Holder"> Meritorious Students</TabsTrigger>
+            <TabsTrigger value="Job Holder"> Job Holders</TabsTrigger>
             <TabsTrigger value="Student">Students</TabsTrigger>
             <TabsTrigger value="Teacher">Teachers</TabsTrigger>
           </TabsList>
