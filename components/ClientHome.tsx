@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import AlumniCard from "@/components/AlumniCard";
 import SortControls from "@/components/SortControls";
 import FilterControls from "@/components/FilterControls";
-import { Alumni } from "@/app/page";
 import { AlumniRecord } from "@/lib/types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
@@ -60,7 +59,7 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
       let matches = true;
 
       if (filterKey && filterValue) {
-        const alumnusValue = alumnus[filterKey as keyof Alumni];
+        const alumnusValue = alumnus[filterKey as keyof AlumniRecord];
         matches = matches && alumnusValue === filterValue;
       }
 

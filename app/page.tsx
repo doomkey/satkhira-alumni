@@ -1,23 +1,16 @@
 import { supabase } from "@/lib/supabaseClient";
 import Hero from "@/components/Hero";
 import ClientHome from "@/components/ClientHome";
+import { AlumniRecord } from "@/lib/types";
 
 export const revalidate = 10;
 
-export interface Alumni {
-  id: number;
-  name: string;
-  session: string;
-  profession: string;
-  upazilla: string;
-  faculty: string;
-}
-
 export default async function Home() {
-  const { data: alumni } = await supabase
+  const { data } = await supabase
     .from("alumni")
     .select("*")
     .order("profession", { ascending: true });
+  const alumni: AlumniRecord[] = data ?? [];
 
   return (
     <main>
