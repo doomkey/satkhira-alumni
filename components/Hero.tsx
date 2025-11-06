@@ -1,8 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { Alumni } from "@/app/page";
 
-export default function Hero({ alumni }) {
+export default function Hero({ alumni }: { alumni: Alumni[] }) {
   const scrollToBottom = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
