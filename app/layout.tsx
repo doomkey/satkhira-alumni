@@ -8,7 +8,7 @@ const roboto = Roboto({
   subsets: ["latin"],
 });
 export const metadata: Metadata = {
-  title: "Student Association of Satkhira, PSTU",
+  title: "Students Association of Satkhira, PSTU",
   description: "",
 };
 

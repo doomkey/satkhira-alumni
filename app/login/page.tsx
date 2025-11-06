@@ -90,7 +90,7 @@ export default function LoginPage() {
         </CardContent>
 
         <CardFooter className="text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Student Association of Satkhira
+          © {new Date().getFullYear()} Students Association of Satkhira
         </CardFooter>
       </Card>
     </main>

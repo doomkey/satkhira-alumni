@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
-export default function Hero() {
+export default function Hero({ alumni }) {
   const scrollToBottom = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
@@ -11,14 +11,34 @@ export default function Hero() {
   };
 
   return (
-    <section className="flex flex-col items-center justify-center text-center min-h-screen px-6 bg-gradient-to-b from-background to-muted relative">
+    <section className="flex flex-col items-center justify-center text-center min-h-screen px-6 bg-gradient-to-b from-background to-muted relative border-b-8 border-primary">
       <div className="flex flex-col items-center justify-center text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold mb-4 tracking-tight">
-          Student Association of Satkhira
+        <div className="flex items-center justify-center">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute left-0 -translate-x-16 rotate-[-90deg] text-center">
+              <p className="text-black font-semibold text-lg tracking-tight">
+                Connect with
+              </p>
+            </div>
+
+            <h1 className="text-[8rem] md:text-[12rem] lg:text-[19rem] font-extrabold text-black text-primary leading-none m-0">
+              {alumni.length}
+            </h1>
+
+            <div className="absolute right-0 translate-x-16 rotate-90 text-center">
+              <p className="text-black font-semibold text-lg tracking-tight">
+                Alumni
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 tracking-tight">
+          Students Association of Satkhira
         </h1>
-        <p className="text-muted-foreground mb-8 text-lg max-w-xl">
+        {/* <p className="text-muted-foreground mb-8 text-lg max-w-xl">
           Connecting students and alumni across the region.
-        </p>
+        </p> */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button asChild size="lg">
             <a href="#alumni">View Alumni</a>

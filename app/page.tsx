@@ -21,7 +21,7 @@ export default async function Home() {
 
   return (
     <main>
-      <Hero />
+      <Hero alumni={alumni} />
       <div className="max-w-2xl mx-auto p-6 scroll-smooth" id="alumni">
         <ClientHome initialAlumni={alumni || []} />
       </div>
