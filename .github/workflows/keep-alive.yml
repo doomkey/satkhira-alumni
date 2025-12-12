@@ -14,5 +14,11 @@ jobs:
         run: |
           echo "Pinging site"
 
-          curl -s -f -o /dev/null "https://satkhira-alumni.vercel.app"
-          echo "Ping successful."
+          curl -s -f -S "https://satkhira-alumni.vercel.app" > response.txt
+          if [ $? -ne 0 ]; then
+            echo "Ping FAILED."
+            exit 1
+          fi
+          echo "Ping successful. First 10 lines of content:"
+          head -n 10 response.txt
+          echo "..."
