@@ -1,24 +1,19 @@
-name: Simple Website Ping Keep-Alive
+name: Supabase Keep Alive
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 9 * * 1,4"
   workflow_dispatch:
 
 jobs:
-  ping_website:
+  ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Website to Keep Supabase Active
-
+      - name: Ping Supabase Database
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          echo "Pinging site"
-
-          curl -s -f -S "https://satkhira-alumni.vercel.app" > response.txt
-          if [ $? -ne 0 ]; then
-            echo "Ping FAILED."
-            exit 1
-          fi
-          echo "Ping successful. First 10 lines of content:"
-          head -n 10 response.txt
-          echo "..."
+          curl -X GET "$SUPABASE_URL/rest/v1/your_table_name?select=id&limit=1" \
+          -H "apikey: $SUPABASE_ANON_KEY" \
+          -H "Authorization: Bearer $SUPABASE_ANON_KEY"
