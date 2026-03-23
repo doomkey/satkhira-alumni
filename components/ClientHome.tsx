@@ -64,8 +64,6 @@ export default function ClientHome({ initialAlumni }: ClientHomeProps) {
       }
 
       if (professionFilter) {
-        console.log(alumnus.profession);
-
         matches =
           matches && alumnus.profession === (professionFilter || "Student");
       }
