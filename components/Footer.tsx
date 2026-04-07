@@ -9,7 +9,7 @@ export default function Footer() {
           <span className="ml-1 text-xs">
             Developed by{" "}
             <strong>
-              <Link href={"https://facebook.com/doomkey.apps"}>Doomkey</Link>
+              <Link href={"https://doomkey.github.io"}>Doomkey</Link>
             </strong>
             .
           </span>
